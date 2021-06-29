@@ -7,41 +7,45 @@ public class WhiteBall : MonoBehaviour
     private float speed = 0.5f;
     private LineRenderer lineRenderer;
     private Renderer Rend;
-    Vector2 PositionOfGameObject;
     AudioSource playerHit;
     bool isHit = false;
- 
+    bool mouseBeingHeld = false;
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         lineRenderer = GetComponent<LineRenderer>();
         Rend = GetComponent<Renderer>();
-        //Set your GameObject position from where you want draw a line
-        PositionOfGameObject = new Vector2(transform.position.x, transform.position.y);
+        lineRenderer.positionCount = 3;
+      //  lineRenderer.material = new Material(Shader.Find("Legacy Shaders/Particles/Alpha Blended Premultiply"));
+      //  lineRenderer.SetColors(Color.black, Color.yellow);
         playerHit = GetComponent<AudioSource>();
     }
 
     Vector2 direction;
     void Update()
-    {   if (!GameMaster.instance.paused)
+    {   if (!GameMaster.instance.paused && GameMaster.instance.whiteIn == false)
         {
-            lineRenderer.SetPosition(0, transform.position);
+            if (Input.GetMouseButtonDown(0) && !GameMaster.instance.areMoving)
+                mouseBeingHeld = true;
+
+            lineRenderer.SetPosition(0, -Camera.main.ScreenToWorldPoint(Input.mousePosition) + 2*transform.position);
+            lineRenderer.SetPosition(1, transform.position);
             // set your Texture Wrap Mode to Repeat in case you want some texture to repeat over the line.
             direction = Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position;
-            if (Mathf.Abs(direction.x) < 3f && Mathf.Abs(direction.y) < 3f && rb.velocity.magnitude == 0)
+            direction = -direction;
+            if (Mathf.Abs(direction.x) < 3f && Mathf.Abs(direction.y) < 3f && rb.velocity.magnitude == 0 && mouseBeingHeld)
             {
                 lineRenderer.SetWidth(0.05f, 0.05f);
-                Vector2 CursorPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                lineRenderer.SetPosition(1, CursorPosition);
-                Rend.material.mainTextureScale = new Vector2(transform.position.x - CursorPosition.x, transform.position.y - CursorPosition.y);
-                if (Input.GetMouseButtonDown(0))
+                Vector2 cursorPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                lineRenderer.SetPosition(2, cursorPosition);
+                if (Input.GetMouseButtonUp(0))
                     lineRenderer.SetWidth(0f, 0f);
             }
             else
             {
                 lineRenderer.SetWidth(0f, 0f);
             }
-            if (Input.GetMouseButtonDown(0) && Mathf.Abs(direction.x) < 3f && Mathf.Abs(direction.y) < 3f && rb.velocity.magnitude == 0 && !GameMaster.instance.areMoving)
+            if (Input.GetMouseButtonUp(0) && Mathf.Abs(direction.x) < 3f && Mathf.Abs(direction.y) < 3f && rb.velocity.magnitude == 0 && !GameMaster.instance.areMoving && mouseBeingHeld)
             {
                 isHit = true;
                 GameMaster.instance.whiteHit = true;
@@ -49,6 +53,7 @@ public class WhiteBall : MonoBehaviour
                 GameMaster.instance.stripedHit = false;
                 playerHit.Play();
                 rb.AddForce(direction * speed, ForceMode2D.Impulse);
+                mouseBeingHeld = false;
             }
         }
         

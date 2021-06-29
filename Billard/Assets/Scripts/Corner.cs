@@ -49,7 +49,6 @@ public class Corner : MonoBehaviour
     {
         GameMaster.instance.stripedHit = true;
         collision.gameObject.GetComponent<Ball>().isScored = true;
-        Debug.Log(GameMaster.instance.solidScore);
 
         if (GameMaster.instance.solid)
         {
@@ -79,7 +78,6 @@ public class Corner : MonoBehaviour
     public void solidOnCorner(Collision2D collision)
     {
         collision.gameObject.GetComponent<Ball>().isScored = true;
-        Debug.Log(GameMaster.instance.solidScore);
         GameMaster.instance.solidHit = true;
         if (GameMaster.instance.solid)
         {
@@ -121,7 +119,7 @@ public class Corner : MonoBehaviour
 
     public void checkWhite()
     {
-        if (Input.GetMouseButtonDown(0) && whiteCollided)
+        if (Input.GetMouseButtonUp(0) && whiteCollided)
         {
             Vector2 cursorPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             var hitColliders = Physics2D.OverlapCircle(cursorPos, 0.3f);
@@ -131,6 +129,7 @@ public class Corner : MonoBehaviour
                 whiteBall.transform.position = cursorPos;
                 whiteBall.SetActive(true);
                 whiteCollided = false;
+               // GameMaster.instance.whiteIn = false; //**
             }
         }
     }
